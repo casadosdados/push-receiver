@@ -3,15 +3,15 @@ const request = require('../utils/request');
 const protobuf = require('protobufjs');
 const Long = require('long');
 const { waitFor } = require('../utils/timeout');
-const fcmKey = require('../fcm/server-key');
-const { toBase64 } = require('../utils/base64');
+// const fcmKey = require('../fcm/server-key');
+// const { toBase64 } = require('../utils/base64');
 
 // Hack to fix PHONE_REGISTRATION_ERROR #17 when bundled with webpack
 // https://github.com/dcodeIO/protobuf.js#browserify-integration
-protobuf.util.Long = Long
-protobuf.configure()
+protobuf.util.Long = Long;
+protobuf.configure();
 
-const serverKey = toBase64(Buffer.from(fcmKey));
+// const serverKey = toBase64(Buffer.from(fcmKey));
 
 const REGISTER_URL = 'https://android.clients.google.com/c2dm/register3';
 const CHECKIN_URL = 'https://android.clients.google.com/checkin';
@@ -24,9 +24,9 @@ module.exports = {
   checkIn,
 };
 
-async function register(appId) {
+async function register(appInfo) {
   const options = await checkIn();
-  const credentials = await doRegister(options, appId);
+  const credentials = await doRegister(options, appInfo);
   return credentials;
 }
 
@@ -51,12 +51,13 @@ async function checkIn(androidId, securityToken) {
   return object;
 }
 
-async function doRegister({ androidId, securityToken }, appId) {
+async function doRegister({ androidId, securityToken }, appInfo) {
   const body = {
-    app         : 'org.chromium.linux',
-    'X-subtype' : appId,
+    app         : appInfo.appPackage,
+    'X-subtype' : appInfo.senderId,
     device      : androidId,
-    sender      : serverKey,
+    sender      : appInfo.senderId,
+    cert        : appInfo.cert,
   };
   const response = await postRegister({ androidId, securityToken, body });
   const token = response.split('=')[1];
@@ -64,7 +65,7 @@ async function doRegister({ androidId, securityToken }, appId) {
     token,
     androidId,
     securityToken,
-    appId,
+    appInfo,
   };
 }
 
