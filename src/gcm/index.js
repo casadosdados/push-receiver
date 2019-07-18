@@ -59,7 +59,7 @@ async function doRegister({ androidId, securityToken }, appInfo) {
     sender      : appInfo.senderId,
     cert        : appInfo.cert,
     'X-app_ver' : '49',
-    'app_ver'   : '49',
+    app_ver     : '49',
   };
   const response = await postRegister({ androidId, securityToken, body });
   const token = response.split('=')[1];
@@ -78,7 +78,7 @@ async function postRegister({ androidId, securityToken, body, retry = 0 }) {
     headers : {
       Authorization  : `AidLogin ${androidId}:${securityToken}`,
       'Content-Type' : 'application/x-www-form-urlencoded',
-      app            : body.app
+      app            : body.app,
     },
     form : body,
   });
@@ -112,7 +112,7 @@ function getCheckinRequest(androidId, securityToken) {
   const payload = {
     userSerialNumber : 0,
     checkin          : {
-      type        : 1,
+      type : 1,
       // chromeBuild : {
       //   platform      : 2,
       //   chromeVersion : '63.0.3234.0',
